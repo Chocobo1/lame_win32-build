@@ -1,0 +1,111 @@
+# Notes:
+# - Minimal appveyor.yml file is an empty file. All sections are optional.
+# - Indent each level of configuration with 2 spaces. Do not use tabs!
+# - All section names are case-sensitive.
+# - Section names should be unique on each level.
+
+#---------------------------------#
+#  general configuration          #
+#---------------------------------#
+
+# version format
+version: '{branch}-{build}'
+
+# Do not build on tags (GitHub only)
+skip_tags: true
+
+# avoid malicious attempt via pull requests
+branches:
+  only:
+    - master
+    - stable
+
+
+#---------------------------------#
+#  environment configuration      #
+#---------------------------------#
+
+# environment variables
+# build system info: http://www.appveyor.com/docs/installed-software
+os: Visual Studio 2015
+
+environment:
+  REPO_DIR: &REPO_DIR c:\project  # directory created by appveyor
+
+  NASM_URL: http://www.nasm.us/pub/nasm/releasebuilds/2.11.09rc2/win32/nasm-2.11.09rc2-win32.zip
+
+  LAME_LATEST_URL: http://lame.cvs.sourceforge.net/viewvc/lame/lame/?view=tar
+  LAME_STABLE_URL: http://sourceforge.net/projects/lame/files/lame/3.99/lame-3.99.5.tar.gz
+
+  LAME_SOL_FILE: vc9_lame.sln
+  LAME_MSBUILD_CMD_X86: /m /p:Configuration=ReleaseNASM;Platform=Win32 /t:"app lame"
+  LAME_MSBUILD_CMD_X64: /m /p:Configuration=Release;Platform=x64 /t:"app lame"
+
+# clone directory
+clone_folder: *REPO_DIR
+
+
+#---------------------------------#
+#  build configuration            #
+#---------------------------------#
+
+# scripts to run before build
+install:
+  - CD \
+  - appveyor DownloadFile "%NASM_URL%" -FileName "c:\nasm.zip"
+  - 7z x "nasm.zip" > nul && DEL nasm.zip
+  - MOVE nasm* NASM
+  - SET PATH=%PATH%;c:\NASM;
+  - nasm -v
+
+before_build:
+  # download code according to branch name
+  - CD "%REPO_DIR%"
+  - ECHO "%APPVEYOR_REPO_BRANCH%"
+  - IF "%APPVEYOR_REPO_BRANCH%" == "master" (SET DL_URL=%LAME_LATEST_URL%)
+  - IF "%APPVEYOR_REPO_BRANCH%" == "stable" (SET DL_URL=%LAME_STABLE_URL%)
+  - appveyor DownloadFile "%DL_URL%" -FileName "%REPO_DIR%\lame.tar.gz"
+
+  # extract
+  - 7z x "lame.tar.gz" > nul && 7z x "*.tar" > nul && DEL lame*
+  - MOVE "lame*" "lame_src"
+
+  # copy new project to code base
+  - MOVE "vc_solution_2015" "%REPO_DIR%\lame_src"
+
+build_script:
+  # move patch & patch it!
+  - CD "%REPO_DIR%" && COPY "remove_static_assert.patch" "%REPO_DIR%\lame_src\libmp3lame"
+  - CD "%REPO_DIR%\lame_src\libmp3lame" && patch < "remove_static_assert.patch"
+
+  # compile
+  - msbuild "%REPO_DIR%\lame_src\vc_solution_2015\%LAME_SOL_FILE%" %LAME_MSBUILD_CMD_X86%
+  - msbuild "%REPO_DIR%\lame_src\vc_solution_2015\%LAME_SOL_FILE%" %LAME_MSBUILD_CMD_X64%
+
+after_build:
+  # prepare for artifacts packaging
+  - CD "%REPO_DIR%"
+  - MKDIR "win32" "x64"
+  - copy "%REPO_DIR%\lame_src\output\ReleaseNASM\lame.exe" "win32"
+  - copy "%REPO_DIR%\lame_src\output\Release\lame.exe" "x64"
+  - 7z a -mx9 "lame.7z" "win32" "x64"
+  - powershell -Command "& { (Get-FileHash -Algorithm SHA1 "lame.7z").hash; }" > "lame.7z.sha1"
+
+
+#---------------------------------#
+#  tests configuration            #
+#---------------------------------#
+
+# to disable automatic tests
+test: off
+
+
+#---------------------------------#
+#  artifacts configuration        #
+#---------------------------------#
+
+artifacts:
+  - path: lame.7z
+    name: exe
+  - path: lame.7z.sha1
+    name: checksum
