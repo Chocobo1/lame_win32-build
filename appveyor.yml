@@ -32,7 +32,7 @@ os: Visual Studio 2015
 environment:
   REPO_DIR: &REPO_DIR c:\project  # directory created by appveyor
 
-  NASM_URL: http://www.nasm.us/pub/nasm/releasebuilds/2.11.09rc2/win32/nasm-2.11.09rc2-win32.zip
+  NASM_URL: http://www.nasm.us/pub/nasm/releasebuilds/2.12.01/win32/nasm-2.12.01-win32.zip
 
   LAME_LATEST_URL: http://lame.cvs.sourceforge.net/viewvc/lame/lame/?view=tar
   LAME_STABLE_URL: http://sourceforge.net/projects/lame/files/lame/3.99/lame-3.99.5.tar.gz
@@ -53,8 +53,8 @@ clone_folder: *REPO_DIR
 install:
   - CD \
   - appveyor DownloadFile "%NASM_URL%" -FileName "c:\nasm.zip"
-  - 7z x "nasm.zip" > nul && DEL nasm.zip
-  - MOVE nasm* NASM
+  - 7z x "nasm.zip" > nul
+  - MOVE nasm-* NASM
   - SET PATH=%PATH%;c:\NASM;
   - nasm -v
 
@@ -88,7 +88,7 @@ after_build:
   - MKDIR "win32" "x64"
   - copy "%REPO_DIR%\lame_src\output\ReleaseNASM\lame.exe" "win32"
   - copy "%REPO_DIR%\lame_src\output\Release\lame.exe" "x64"
-  - 7z a -mx9 "lame.7z" "win32" "x64"
+  - 7z a -mx9 "lame.7z" "Readme.md" "win32" "x64"
   - powershell -Command "& { (Get-FileHash -Algorithm SHA1 "lame.7z").hash; }" > "lame.7z.sha1"
 
 
