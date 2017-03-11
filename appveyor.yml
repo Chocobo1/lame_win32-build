@@ -14,11 +14,10 @@ version: '{branch}-{build}'
 # Do not build on tags (GitHub only)
 skip_tags: true
 
-# avoid malicious attempt via pull requests
+# manual mode
 branches:
-  only:
-    - master
-    - stable
+  except:
+    - /.*/
 
 
 #---------------------------------#
@@ -26,20 +25,20 @@ branches:
 #---------------------------------#
 
 # environment variables
-# build system info: http://www.appveyor.com/docs/installed-software
-os: Visual Studio 2015
+# build system info: https://www.appveyor.com/docs/build-environment/#pre-installed-software
+os: Visual Studio 2017
 
 environment:
   REPO_DIR: &REPO_DIR c:\project  # directory created by appveyor
 
-  NASM_URL: http://www.nasm.us/pub/nasm/releasebuilds/2.12.01/win32/nasm-2.12.01-win32.zip
+  NASM_URL: http://www.nasm.us/pub/nasm/releasebuilds/2.12.02/win64/nasm-2.12.02-win64.zip
 
   LAME_LATEST_URL: http://lame.cvs.sourceforge.net/viewvc/lame/lame/?view=tar
-  LAME_STABLE_URL: http://sourceforge.net/projects/lame/files/lame/3.99/lame-3.99.5.tar.gz
+  LAME_STABLE_URL: https://sourceforge.net/projects/lame/files/lame/3.99/lame-3.99.5.tar.gz
 
   LAME_SOL_FILE: vc9_lame.sln
-  LAME_MSBUILD_CMD_X86: /m /p:Configuration=ReleaseNASM;Platform=Win32 /t:"app lame"
-  LAME_MSBUILD_CMD_X64: /m /p:Configuration=Release;Platform=x64 /t:"app lame"
+  LAME_MSBUILD_CMD_X86: /maxcpucount /target:"app lame" /property:Configuration=ReleaseNASM,Platform=Win32
+  LAME_MSBUILD_CMD_X64: /maxcpucount /target:"app lame" /property:Configuration=Release,Platform=x64
 
 # clone directory
 clone_folder: *REPO_DIR
