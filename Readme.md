@@ -1,6 +1,6 @@
 # [LAME](http://lame.sourceforge.net/) Unofficial Builds [![AppVeyor_badge]][AppVeyor_link]
 
-[AppVeyor_badge]: https://ci.appveyor.com/api/projects/status/github/Chocobo1/lame_win32-build?branch=master&svg=true
+[AppVeyor_badge]: https://ci.appveyor.com/api/projects/status/github/Chocobo1/lame_win32-build?branch=stable&svg=true
 [AppVeyor_link]: https://ci.appveyor.com/project/Chocobo1/lame-win32-build
 
 
