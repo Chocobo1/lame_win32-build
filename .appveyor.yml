@@ -71,7 +71,7 @@ before_build:
   - MOVE "lame*" "lame_src"
 
   # copy new project to code base
-  - MOVE "vc_solution_2015" "%REPO_DIR%\lame_src"
+  - MOVE "vc_solution_" "%REPO_DIR%\lame_src"
 
 build_script:
   # move patch & patch it!
@@ -79,8 +79,8 @@ build_script:
   - CD "%REPO_DIR%\lame_src\libmp3lame" && patch < "remove_static_assert.patch"
 
   # compile
-  - msbuild "%REPO_DIR%\lame_src\vc_solution_2015\%LAME_SOL_FILE%" %LAME_MSBUILD_CMD_X86%
-  - msbuild "%REPO_DIR%\lame_src\vc_solution_2015\%LAME_SOL_FILE%" %LAME_MSBUILD_CMD_X64%
+  - msbuild "%REPO_DIR%\lame_src\vc_solution_\%LAME_SOL_FILE%" %LAME_MSBUILD_CMD_X86%
+  - msbuild "%REPO_DIR%\lame_src\vc_solution_\%LAME_SOL_FILE%" %LAME_MSBUILD_CMD_X64%
 
 after_build:
   # prepare for artifacts packaging
