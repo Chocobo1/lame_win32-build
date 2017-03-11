@@ -52,7 +52,7 @@
       HelpContext="0"
       DisplayName="Additional include directories"
       Separator=";"
-      Switch="-i [value]" />
+      Switch="-i &quot;[value]&quot;" />
     <StringListProperty
       Name="Defines"
       HelpContext="0"

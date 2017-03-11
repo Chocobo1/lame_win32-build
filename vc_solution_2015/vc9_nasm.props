@@ -15,7 +15,7 @@
       <BinFormat>win32</BinFormat>
       <IncludeDir>%(RootDir)%(Directory)</IncludeDir>
       <Defines>WIN32</Defines>
-      <CommandLineTemplate>nasm [BinFormat] [IncludeDir] [Defines] -o [OutFile] %(FullPath)</CommandLineTemplate>
+      <CommandLineTemplate>nasm [BinFormat] [IncludeDir] [Defines] -o "[OutFile]" "%(FullPath)"</CommandLineTemplate>
       <Outputs>[OutFile]</Outputs>
       <ExecutionDescription>Assembling %(Filename)...</ExecutionDescription>
       <ShowOnlyRuleProperties>false</ShowOnlyRuleProperties>
