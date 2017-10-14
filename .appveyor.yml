@@ -32,10 +32,10 @@ os: Visual Studio 2017
 environment:
   REPO_DIR: &REPO_DIR c:\project  # directory created by appveyor
 
-  NASM_URL: http://www.nasm.us/pub/nasm/releasebuilds/2.12.02/win64/nasm-2.12.02-win64.zip
+  NASM_URL: http://www.nasm.us/pub/nasm/releasebuilds/2.13.01/win64/nasm-2.13.01-win64.zip
 
-  LAME_LATEST_URL: http://lame.cvs.sourceforge.net/viewvc/lame/lame/?view=tar
-  LAME_STABLE_URL: https://sourceforge.net/projects/lame/files/lame/3.99/lame-3.99.5.tar.gz
+  LAME_LATEST_URL: https://sourceforge.net/code-snapshots/svn/l/la/lame/svn/lame-svn-6410-trunk.zip
+  LAME_STABLE_URL: https://sourceforge.net/projects/lame/files/lame/3.100/lame-3.100.tar.gz
 
   LAME_SOL_FILE: vc9_lame.sln
   LAME_MSBUILD_CMD_X86: /maxcpucount /target:"app lame" /property:Configuration=ReleaseNASM,Platform=Win32
@@ -74,10 +74,6 @@ before_build:
   - MOVE "vc_solution_" "%REPO_DIR%\lame_src"
 
 build_script:
-  # move patch & patch it!
-  - CD "%REPO_DIR%" && COPY "remove_static_assert.patch" "%REPO_DIR%\lame_src\libmp3lame"
-  - CD "%REPO_DIR%\lame_src\libmp3lame" && patch < "remove_static_assert.patch"
-
   # compile
   - msbuild "%REPO_DIR%\lame_src\vc_solution_\%LAME_SOL_FILE%" %LAME_MSBUILD_CMD_X86%
   - msbuild "%REPO_DIR%\lame_src\vc_solution_\%LAME_SOL_FILE%" %LAME_MSBUILD_CMD_X64%
