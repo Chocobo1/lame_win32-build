@@ -1,4 +1,8 @@
-# [LAME](http://lame.sourceforge.net/) Unofficial Builds [![AppVeyor Build](https://ci.appveyor.com/api/projects/status/github/Chocobo1/lame_win32-build?branch=master&svg=true)](https://ci.appveyor.com/project/Chocobo1/lame-win32-build)
+# [LAME](http://lame.sourceforge.net/) Unofficial Builds [![AppVeyor_badge]][AppVeyor_link]
+
+[AppVeyor_badge]: https://ci.appveyor.com/api/projects/status/github/Chocobo1/lame_win32-build?branch=master&svg=true
+[AppVeyor_link]: https://ci.appveyor.com/project/Chocobo1/lame-win32-build
+
 
 ### <a href="http://lame.sourceforge.net/"><img src="http://lame.sourceforge.net/images/logo.gif" alt="LAME logo" height="96"></a>
 * If you're looking for
