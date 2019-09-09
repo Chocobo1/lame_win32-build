@@ -26,13 +26,13 @@ branches:
 #---------------------------------#
 
 # environment variables
-# build system info: https://www.appveyor.com/docs/build-environment/#pre-installed-software
-os: Visual Studio 2017
+# build system info: https://www.appveyor.com/docs/windows-images-software/
+os: Visual Studio 2019
 
 environment:
   REPO_DIR: &REPO_DIR c:\project  # directory created by appveyor
 
-  NASM_URL: http://www.nasm.us/pub/nasm/releasebuilds/2.13.01/win64/nasm-2.13.01-win64.zip
+  NASM_URL: https://www.nasm.us/pub/nasm/releasebuilds/2.14.02/win64/nasm-2.14.02-win64.zip
 
   LAME_LATEST_URL: https://svn.code.sf.net/p/lame/svn/trunk
   LAME_STABLE_URL: https://sourceforge.net/projects/lame/files/lame/3.100/lame-3.100.tar.gz
@@ -87,7 +87,7 @@ after_build:
   - copy "%REPO_DIR%\lame_src\output\ReleaseNASM\lame.exe" "win32"
   - copy "%REPO_DIR%\lame_src\output\Release\lame.exe" "x64"
   - 7z a -mx9 "lame.7z" "Readme.md" "win32" "x64"
-  - 'powershell -Command "& { $hash = (Get-FileHash -Algorithm SHA1 "lame.7z").hash.ToString().toLower(); Write-Host $hash " *lame.7z"; }" > "lame.7z.sha1"'
+  - 'powershell -Command "& { $hash = (Get-FileHash -Algorithm SHA256 "lame.7z").hash.ToString().toLower(); Write-Host $hash " *lame.7z"; }" > "lame.7z.sha256"'
 
 
 #---------------------------------#
@@ -105,5 +105,5 @@ test: off
 artifacts:
   - path: lame.7z
     name: exe
-  - path: lame.7z.sha1
+  - path: lame.7z.sha256
     name: checksum
