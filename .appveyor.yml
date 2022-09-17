@@ -27,12 +27,12 @@ branches:
 
 # environment variables
 # build system info: https://www.appveyor.com/docs/windows-images-software/
-os: Visual Studio 2019
+os: Visual Studio 2022
 
 environment:
   REPO_DIR: &REPO_DIR c:\project  # directory created by appveyor
 
-  NASM_URL: https://www.nasm.us/pub/nasm/releasebuilds/2.14.02/win64/nasm-2.14.02-win64.zip
+  NASM_URL: https://www.nasm.us/pub/nasm/releasebuilds/2.15.05/win64/nasm-2.15.05-win64.zip
 
   LAME_LATEST_URL: https://svn.code.sf.net/p/lame/svn/trunk
   LAME_STABLE_URL: https://sourceforge.net/projects/lame/files/lame/3.100/lame-3.100.tar.gz
