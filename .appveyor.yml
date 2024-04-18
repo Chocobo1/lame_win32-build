@@ -17,7 +17,6 @@ skip_tags: true
 # avoid malicious attempt via pull requests
 branches:
   only:
-    - master
     - stable
 
 
