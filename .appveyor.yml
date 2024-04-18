@@ -31,14 +31,17 @@ os: Visual Studio 2022
 environment:
   REPO_DIR: &REPO_DIR c:\project  # directory created by appveyor
 
-  NASM_URL: https://www.nasm.us/pub/nasm/releasebuilds/2.15.05/win64/nasm-2.15.05-win64.zip
+  NASM_URL: https://www.nasm.us/pub/nasm/releasebuilds/2.16.03/win64/nasm-2.16.03-win64.zip
 
   LAME_LATEST_URL: https://svn.code.sf.net/p/lame/svn/trunk
   LAME_STABLE_URL: https://sourceforge.net/projects/lame/files/lame/3.100/lame-3.100.tar.gz
 
-  LAME_SOL_FILE: vc9_lame.sln
-  LAME_MSBUILD_CMD_X86: /maxcpucount /target:"app lame" /property:Configuration=ReleaseNASM,Platform=Win32
-  LAME_MSBUILD_CMD_X64: /maxcpucount /target:"app lame" /property:Configuration=Release,Platform=x64
+  LAME_SOL_FILE: vs2019_lame.sln
+  LAME_MSBUILD_CMD_X86: /maxcpucount /target:"lame" /property:Configuration=ReleaseNASM,Platform=Win32
+  LAME_MSBUILD_CMD_X64: /maxcpucount /target:"lame" /property:Configuration=Release,Platform=x64
+
+  MPG123_URL_X86: https://mpg123.de/download/win32/1.32.6/mpg123-1.32.6-x86.zip
+  MPG123_URL_X64: https://mpg123.de/download/win64/1.32.6/mpg123-1.32.6-x86-64.zip
 
 # clone directory
 clone_folder: *REPO_DIR
@@ -63,7 +66,22 @@ before_build:
   - ECHO "%APPVEYOR_REPO_BRANCH%"
   - IF "%APPVEYOR_REPO_BRANCH%" == "master" (
       svn checkout "%LAME_LATEST_URL%" "lame-svn" &&
-      MOVE "lame-svn\lame" "lame_src"
+      MOVE "lame-svn\lame" "lame_src" &&
+      powershell -Command "& { (Get-Content 'lame_src\vc_solution\vs2019_lame_lame.vcxproj') | ForEach-Object { $_ -replace 'v142', 'v143' } | Set-Content 'lame_src\vc_solution\vs2019_lame_lame.vcxproj' }"  &&
+      powershell -Command "& { (Get-Content 'lame_src\vc_solution\vs2019_lame_mp3rtp.vcxproj') | ForEach-Object { $_ -replace 'v142', 'v143' } | Set-Content 'lame_src\vc_solution\vs2019_lame_mp3rtp.vcxproj' }" &&
+      powershell -Command "& { (Get-Content 'lame_src\vc_solution\vs2019_lame_mp3x.vcxproj') | ForEach-Object { $_ -replace 'v142', 'v143' } | Set-Content 'lame_src\vc_solution\vs2019_lame_mp3x.vcxproj' }" &&
+      powershell -Command "& { (Get-Content 'lame_src\vc_solution\vs2019_libmp3lame.vcxproj') | ForEach-Object { $_ -replace 'v142', 'v143' } | Set-Content 'lame_src\vc_solution\vs2019_libmp3lame.vcxproj' }" &&
+      powershell -Command "& { (Get-Content 'lame_src\vc_solution\vs2019_libmp3lame_dll.vcxproj') | ForEach-Object { $_ -replace 'v142', 'v143' } | Set-Content 'lame_src\vc_solution\vs2019_libmp3lame_dll.vcxproj' }" &&
+      powershell -Command "& { (Get-Content 'lame_src\vc_solution\vs2019_libmpg123_config.props') | ForEach-Object { $_ -replace '<HaveMpg123>false</', '<HaveMpg123>true</' } | Set-Content 'lame_src\vc_solution\vs2019_libmpg123_config.props' }" &&
+      MKDIR lame_src\vc_solution\mpg123 &&
+      appveyor DownloadFile "%MPG123_URL_X86%" -FileName "mpg123_x86.zip" &&
+      7z x "mpg123_x86.zip" > nul &&
+      MOVE mpg123-* Win32 &&
+      MOVE Win32 lame_src\vc_solution\mpg123 &&
+      appveyor DownloadFile "%MPG123_URL_X64%" -FileName "mpg123_x64.zip" &&
+      7z x "mpg123_x64.zip" > nul &&
+      MOVE mpg123-* x64 &&
+      MOVE x64 lame_src\vc_solution\mpg123
     )
   - IF "%APPVEYOR_REPO_BRANCH%" == "stable" (
       appveyor DownloadFile "%LAME_STABLE_URL%" -FileName "%REPO_DIR%\lame.tar.gz" &&
@@ -71,22 +89,21 @@ before_build:
       MOVE "lame*" "lame_src"
     )
 
-  # copy new project to code base
-  - MOVE "vc_solution_" "%REPO_DIR%\lame_src"
-
 build_script:
   # compile
-  - msbuild "%REPO_DIR%\lame_src\vc_solution_\%LAME_SOL_FILE%" %LAME_MSBUILD_CMD_X86%
-  - msbuild "%REPO_DIR%\lame_src\vc_solution_\%LAME_SOL_FILE%" %LAME_MSBUILD_CMD_X64%
+  - msbuild "%REPO_DIR%\lame_src\vc_solution\%LAME_SOL_FILE%" %LAME_MSBUILD_CMD_X86%
+  - msbuild "%REPO_DIR%\lame_src\vc_solution\%LAME_SOL_FILE%" %LAME_MSBUILD_CMD_X64%
 
 after_build:
   # prepare for artifacts packaging
   - CD "%REPO_DIR%"
   - MKDIR "win32" "x64"
-  - copy "%REPO_DIR%\lame_src\output\ReleaseNASM\lame.exe" "win32"
-  - copy "%REPO_DIR%\lame_src\output\Release\lame.exe" "x64"
-  - 7z a -mx9 "lame.7z" "Readme.md" "win32" "x64"
-  - 'powershell -Command "& { $hash = (Get-FileHash -Algorithm SHA256 "lame.7z").hash.ToString().toLower(); Write-Host $hash " *lame.7z"; }" > "lame.7z.sha256"'
+  - copy "%REPO_DIR%\lame_src\output\Win32\ReleaseNASM\lame.exe" "win32"
+  - copy "%REPO_DIR%\lame_src\output\Win32\ReleaseNASM\libmpg123-0.dll" "win32"
+  - copy "%REPO_DIR%\lame_src\output\x64\Release\lame.exe" "x64"
+  - copy "%REPO_DIR%\lame_src\output\x64\Release\libmpg123-0.dll" "x64"
+  - 7z a -sfx7z.sfx -mx9 "lame.exe" "Readme.md" "win32" "x64"
+  - 'powershell -Command "& { $hash = (Get-FileHash -Algorithm SHA256 "lame.exe").hash.ToString().toLower(); Write-Host $hash " *lame.exe"; }" > "lame.exe.sha256"'
 
 
 #---------------------------------#
@@ -102,7 +119,7 @@ test: off
 #---------------------------------#
 
 artifacts:
-  - path: lame.7z
+  - path: lame.exe
     name: exe
-  - path: lame.7z.sha256
+  - path: lame.exe.sha256
     name: checksum
